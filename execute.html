@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Window Protocol Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .window {
+            display: inline-block;
+            margin: 20px;
+            width: 30%;
+            vertical-align: top;
+        }
+
+        .packet-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .packet {
+            width: 50px;
+            height: 50px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .packet.received {
+            background-color: #FF5733;
+        }
+
+        .control {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #CCCCCC;
+        }
+
+        #status {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Sliding Window Protocol Simulation</h1>
+
+        <!-- Sender Window -->
+        <div class="window sender">
+            <h2>Sender</h2>
+            <div class="packet-container">
+                <div class="packet" id="packet0">P0</div>
+                <div class="packet" id="packet1">P1</div>
+                <div class="packet" id="packet2">P2</div>
+                <div class="packet" id="packet3">P3</div>
+                <div class="packet" id="packet4">P4</div>
+                <div class="packet" id="packet5">P5</div>
+            </div>
+        </div>
+
+        <!-- Control Button -->
+        <div class="control">
+            <button onclick="startTransmission()">Start Transmission</button>
+            <div id="status">Status: Waiting</div>
+        </div>
+
+        <!-- Receiver Window -->
+        <div class="window receiver">
+            <h2>Receiver</h2>
+            <div class="packet-container">
+                <div class="packet" id="ack0">Ack 0</div>
+                <div class="packet" id="ack1">Ack 1</div>
+                <div class="packet" id="ack2">Ack 2</div>
+                <div class="packet" id="ack3">Ack 3</div>
+                <div class="packet" id="ack4">Ack 4</div>
+                <div class="packet" id="ack5">Ack 5</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let windowSize = 3; // Size of the sliding window
+        let totalPackets = 6; // Total number of packets
+        let currentWindowStart = 0; // Start index of the current window
+        let currentWindowEnd = windowSize - 1; // End index of the current window
+        let timer = null;
+
+        const packets = [];
+        const acks = [];
+
+        for (let i = 0; i < totalPackets; i++) {
+            packets.push(document.getElementById(`packet${i}`));
+            acks.push(document.getElementById(`ack${i}`));
+        }
+
+        function startTransmission() {
+            document.querySelector('button').disabled = true;
+            document.getElementById('status').innerText = "Status: Transmitting";
+
+            // Send the first window of packets
+            sendWindow();
+        }
+
+        function sendWindow() {
+            // Reset all packets to the default state
+            for (let i = 0; i < totalPackets; i++) {
+                packets[i].classList.remove("received");
+            }
+
+            // Simulate sending packets in the current window
+            for (let i = currentWindowStart; i <= currentWindowEnd; i++) {
+                packets[i].style.backgroundColor = "#4CAF50"; // Green color (Sent)
+            }
+
+            // Simulate receiving acks for the current window
+            setTimeout(() => {
+                for (let i = currentWindowStart; i <= currentWindowEnd; i++) {
+                    acks[i].classList.add("received"); // Red color (Acknowledged)
+                }
+
+                // Move the window forward
+                currentWindowStart++;
+                currentWindowEnd++;
+
+                // If there are more packets, send the next window
+                if (currentWindowEnd < totalPackets) {
+                    setTimeout(sendWindow, 1000); // Simulate window shift after 1 second
+                } else {
+                    document.getElementById('status').innerText = "Status: Transmission Complete";
+                }
+            }, 1000); // Wait for 1 second before acknowledging packets
+        }
+    </script>
+
+</body>
+</html>
